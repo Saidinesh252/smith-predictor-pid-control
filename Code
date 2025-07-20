@@ -1,0 +1,170 @@
+//Matlab Code:
+A = 240.4;
+R = 0.472;
+tau = 113.4;
+delay = 3.5;
+s = tf('s');
+G = R / (tau * s + 1);
+G_delayed = G * exp(-delay * s);
+Kc_ZN = 12;
+Pu = 10;
+Kp_ZN = Kc_ZN;
+Ki_ZN = Kc_ZN / (Pu / 2);
+Kd_ZN = Kp_ZN * (Pu / 8);
+PID_controller_ZN = pid(Kp_ZN, Ki_ZN, Kd_ZN);
+Smith_predictor_ZN = feedback(PID_controller_ZN * G, 1);
+System_with_Smith_ZN = feedback(Smith_predictor_ZN, 1);
+Kp_CC = 99;
+Ki_CC = 98 / 8.5;
+Kd_CC = 120 / 98;
+PID_controller_CC = pid(Kp_CC, Ki_CC, Kd_CC);
+Smith_predictor_CC = feedback(PID_controller_CC * G, 1);
+System_with_Smith_CC = feedback(Smith_predictor_CC, 1);
+simulation_time = 0:0.1:300;
+[ZN_response, t_ZN] = step(System_with_Smith_ZN, simulation_time);
+plot(t_ZN, ZN_response);
+title('Step Response of Liquid Level Control with Smith Predictor (Ziegler-Nichols)');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+grid on;
+figure;
+[CC_response, t_CC] = step(System_with_Smith_CC, simulation_time);
+plot(t_CC, CC_response);
+title('Step Response of Liquid Level Control with Smith Predictor (Cohen-Coon)');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+grid on;
+figure;
+plot(t_ZN, ZN_response, 'r', t_CC, CC_response, 'b');
+title('Comparison of Step Responses: Ziegler-Nichols vs Cohen-Coon (with Smith
+Predictor)');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+legend('Ziegler-Nichols', 'Cohen-Coon');
+grid on;
+P_controller_ZN = pid(Kp_ZN, 0, 0);
+PI_controller_ZN = pid(Kp_ZN, Ki_ZN, 0);
+P_controller_CC = pid(Kp_CC, 0, 0);
+PI_controller_CC = pid(Kp_CC, Ki_CC, 0);
+System_P_ZN = feedback(P_controller_ZN * G, 1);
+System_PI_ZN = feedback(PI_controller_ZN * G, 1);
+40
+System_P_CC = feedback(P_controller_CC * G, 1);
+System_PI_CC = feedback(PI_controller_CC * G, 1);
+figure;
+step(System_P_ZN, simulation_time);
+hold on;
+step(System_PI_ZN, simulation_time);
+step(System_with_Smith_ZN, simulation_time);
+hold off;
+title('Step Responses for P, PI, and PID Controllers (Ziegler-Nichols)');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+legend('P', 'PI', 'PID');
+figure;
+step(System_P_CC, simulation_time);
+hold on;
+step(System_PI_CC, simulation_time);
+step(System_with_Smith_CC, simulation_time);
+hold off;
+title('Step Responses for P, PI, and PID Controllers (Cohen-Coon)');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+legend('P', 'PI', 'PID');
+ZN_P_info = stepinfo(System_P_ZN);
+ZN_PI_info = stepinfo(System_PI_ZN);
+ZN_PID_info = stepinfo(System_with_Smith_ZN);
+CC_P_info = stepinfo(System_P_CC);
+CC_PI_info = stepinfo(System_PI_CC);
+CC_PID_info = stepinfo(System_with_Smith_CC);
+fprintf('\nPerformance Metrics for Ziegler-Nichols Method:\n');
+ZN_results = table({'P'; 'PI'; 'PID'}, [ZN_P_info.RiseTime; ZN_PI_info.RiseTime;
+ZN_PID_info.RiseTime], ...
+ [ZN_P_info.SettlingTime; ZN_PI_info.SettlingTime; ZN_PID_info.SettlingTime], ...
+ [ZN_P_info.Overshoot; ZN_PI_info.Overshoot; ZN_PID_info.Overshoot], ...
+ 'VariableNames', {'Controller', 'RiseTime_sec', 'SettlingTime_sec',
+'Overshoot_percent'})
+fprintf('\nPerformance Metrics for Cohen-Coon Method:\n');
+CC_results = table({'P'; 'PI'; 'PID'}, [CC_P_info.RiseTime; CC_PI_info.RiseTime;
+CC_PID_info.RiseTime], ...
+ [CC_P_info.SettlingTime; CC_PI_info.SettlingTime; CC_PID_info.SettlingTime], ...
+ [CC_P_info.Overshoot; CC_PI_info.Overshoot; CC_PID_info.Overshoot], ...
+ 'VariableNames', {'Controller', 'RiseTime_sec', 'SettlingTime_sec',
+'Overshoot_percent'})
+IAE_P_ZN = sum(abs(1 - step(System_P_ZN, simulation_time))) * (simulation_time(2) -
+simulation_time(1));
+IAE_PI_ZN = sum(abs(1 - step(System_PI_ZN, simulation_time))) * (simulation_time(2)
+- simulation_time(1));
+IAE_PID_ZN = sum(abs(1 - step(System_with_Smith_ZN, simulation_time))) *
+(simulation_time(2) - simulation_time(1));
+IAE_P_CC = sum(abs(1 - step(System_P_CC, simulation_time))) * (simulation_time(2) -
+simulation_time(1));
+IAE_PI_CC = sum(abs(1 - step(System_PI_CC, simulation_time))) * (simulation_time(2)
+- simulation_time(1));
+IAE_PID_CC = sum(abs(1 - step(System_with_Smith_CC, simulation_time))) *
+(simulation_time(2) - simulation_time(1));
+ISE_P_ZN = sum((1 - step(System_P_ZN, simulation_time)).^2) * (simulation_time(2) -
+simulation_time(1));
+ISE_PI_ZN = sum((1 - step(System_PI_ZN, simulation_time)).^2) * (simulation_time(2)
+- simulation_time(1));
+ISE_PID_ZN = sum((1 - ZN_response).^2) * (simulation_time(2) - simulation_time(1));
+ISE_P_CC = sum((1 - step(System_P_CC, simulation_time)).^2) * (simulation_time(2) -
+simulation_time(1));
+ISE_PI_CC = sum((1 - step(System_PI_CC, simulation_time)).^2) * (simulation_time(2)
+- simulation_time(1));
+ISE_PID_CC = sum((1 - CC_response).^2) * (simulation_time(2) - simulation_time(1));
+fprintf('\nPerformance Metrics (IAE and ISE) for Ziegler-Nichols Method:\n');
+ZN_metrics = table({'P'; 'PI'; 'PID'}, ...
+ [IAE_P_ZN; IAE_PI_ZN; IAE_PID_ZN], ...
+ [ISE_P_ZN; ISE_PI_ZN; ISE_PID_ZN], ...
+ 'VariableNames', {'Controller', 'IAE', 'ISE'})
+fprintf('\nPerformance Metrics (IAE and ISE) for Cohen-Coon Method:\n');
+CC_metrics = table({'P'; 'PI'; 'PID'}, ...
+ [IAE_P_CC; IAE_PI_CC; IAE_PID_CC], ...
+ [ISE_P_CC; ISE_PI_CC; ISE_PID_CC], ...
+ 'VariableNames', {'Controller', 'IAE', 'ISE'})
+figure;
+subplot(3, 2, 1);
+[ZN_response, t_ZN] = step(System_with_Smith_ZN, simulation_time);
+plot(t_ZN, ZN_response);
+title('ZN: Step Response with Smith Predictor');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+grid on;
+subplot(3, 2, 2);
+[CC_response, t_CC] = step(System_with_Smith_CC, simulation_time);
+plot(t_CC, CC_response);
+title('CC: Step Response with Smith Predictor');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+grid on;
+43
+subplot(3, 2, 3);
+plot(t_ZN, ZN_response, 'r', t_CC, CC_response, 'b');
+title('Comparison: ZN vs CC (with Smith Predictor)');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+legend('ZN', 'CC');
+grid on;
+subplot(3, 2, 4);
+step(System_P_ZN, simulation_time);
+hold on;
+step(System_PI_ZN, simulation_time);
+step(System_with_Smith_ZN, simulation_time);
+hold off;
+title('ZN: P, PI, PID Responses');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+legend('P', 'PI', 'PID');
+grid on;
+subplot(3, 2, 5);
+step(System_P_CC, simulation_time);
+hold on;
+step(System_PI_CC, simulation_time);
+step(System_with_Smith_CC, simulation_time);
+hold off;
+title('CC: P, PI, PID Responses');
+xlabel('Time (seconds)');
+ylabel('Liquid Level (cm)');
+legend('P', 'PI', 'PID');
+grid on;
