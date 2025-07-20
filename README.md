@@ -31,7 +31,7 @@
 * [cite_start]**Superior Tuning:** When comparing tuning methods, the Cohen-Coon (C-C) method was found to be preferable for stability and efficiency in liquid level regulation[cite: 264]. [cite_start]The C-C method offers a quicker settling time with less overshoot compared to the Ziegler-Nichols (Z-N) method[cite: 262].
 * **Effective Delay Compensation:** The results clearly show that the Smith Predictor effectively counteracts the negative effects of time delays, making it highly useful for industrial applications like chemical processing and water treatment[cite: 327, 328].
 
-![Comparison of ZN and CC Tuning Methods](https://i.imgur.com/kS5xP3V.png)
+![Comparison of ZN and CC Tuning Methods]
 *A comparative simulation result from the study, showing the response of Z-N vs. C-C tuning[cite: 259, 260].*
 
 ### **Repository Contents**
