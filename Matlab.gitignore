@@ -1,1 +1,71 @@
+# MATLAB
+#
+# Created by https://www.gitignore.io/api/matlab
 
+### MATLAB ###
+# Created by https://www.gitignore.io/api/matlab
+# Edit at https://www.gitignore.io/?templates=matlab
+
+# Log file
+*.log
+
+# Session crash file
+matlab_crash_dump.*
+
+# M-file backup
+*.asv
+
+# MLX file backup
+*.mlx~
+
+# MEX files
+*.mex*
+
+# Simulink Code Generation
+slprj/
+
+# Simulink model backup file
+*.bak
+*.slx.original
+
+# MATLAB-generated C code
+*.c
+*.h
+
+# Packaged App
+*.mlappinstall
+
+# Zipped P-Code
+*.zip
+
+# Figure files
+*.fig
+
+# Live editor binary file
+*.mlxb
+
+# Compiled P-files
+*.p
+
+# App Designer file
+*.mlapp
+
+# MATLAB report generator files
+*.rpt
+
+# FORTRAN files
+*.for
+*.f
+
+# Workspace files
+*.mat
+
+# Backup files
+*~
+*.swp
+
+# ML-model files
+*.mlmodel
+
+# HDF5 files
+*.h5
